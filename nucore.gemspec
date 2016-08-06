@@ -30,4 +30,12 @@ Gem::Specification.new do |s|
   s.add_dependency "simple_form", "~> 3.2.1"
   s.add_dependency "will_paginate", "~> 3.0.5"
   s.add_dependency "aasm", "~> 4.10.1"
+  s.add_dependency "cancancan", "1.10"
+  s.add_dependency "text_helpers"
+  s.add_dependency "bootstrap-sass", "~> 2.3.2"
+  s.add_dependency "font-awesome-rails", "~> 3.2.0"
+  s.add_dependency "chosen-rails"
+  s.add_dependency "clockpunch", "~> 0.1.0"
+  s.add_dependency "jquery-ui-rails"
+  s.add_dependency "nested_form_fields"
 end

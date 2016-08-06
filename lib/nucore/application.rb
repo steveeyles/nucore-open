@@ -11,6 +11,14 @@ require "simple_form"
 require "will_paginate"
 require "will_paginate/array"
 require "aasm"
+require "cancan"
+require "text_helpers"
+require "bootstrap-sass"
+require "font-awesome-rails"
+require "chosen-rails"
+require "clockpunch"
+require "jquery-ui-rails"
+require "nested_form_fields"
 
 module Nucore
 

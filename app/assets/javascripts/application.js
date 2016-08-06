@@ -17,4 +17,5 @@
 //= require date
 //= require_tree ./app
 //= require clockpunch
-//= require fine-uploader/jquery.fine-uploader
+// TODO
+// require fine-uploader/jquery.fine-uploader
