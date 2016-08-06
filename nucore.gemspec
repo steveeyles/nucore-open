@@ -20,4 +20,12 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", "~> 4.2.7"
   s.add_dependency "protected_attributes"
   s.add_dependency "rails_config", "0.3.3"
+  s.add_dependency "devise", "~> 3.5.10"
+  s.add_dependency "devise-encryptable", "~> 0.2.0"
+  s.add_dependency "devise_ldap_authenticatable", "~> 0.8.5"
+  s.add_dependency "rails-observers"
+  s.add_dependency "haml", "~> 4.0.5"
+  s.add_dependency "rails-observers"
+  s.add_dependency "paperclip",        "~> 4.2.0"
+
 end

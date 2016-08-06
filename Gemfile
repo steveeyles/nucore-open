@@ -2,31 +2,22 @@ source "https://rubygems.org"
 
 git_source(:github) { |repo_name| "git@github.com:#{repo_name}.git" }
 
-## base
-gem "rails", "4.2.7"
-gem "protected_attributes"
-gem "rails_config",     "0.3.3"
+gemspec
 
 ## database
 gem "mysql2",           "~> 0.3.20"
 
 ## auth
-gem "devise",           "~> 3.5.10"
-gem "devise-encryptable", "~> 0.2.0"
-gem "devise_ldap_authenticatable", "~> 0.8.5"
 gem "cancancan",        "1.10"
 
 ## models
 gem "aasm",             "~> 4.10.1"
-gem "paperclip",        "~> 4.2.0"
 gem "vestal_versions",  "1.2.4.3", github: "elzoiddy/vestal_versions"
 gem "awesome_nested_set", "3.0.3"
 gem "nokogiri",         "~> 1.6.1"
-gem "rails-observers"
 
 ## views
 gem "bootstrap-sass",   "~> 2.3.2"
-gem "haml",             "~> 4.0.5"
 gem "will_paginate",    "~> 3.0.5"
 gem "dynamic_form",     "~> 1.1.4"
 gem "ckeditor", "~> 4.1.6"
