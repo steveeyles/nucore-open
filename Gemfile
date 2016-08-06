@@ -11,21 +11,19 @@ gem "mysql2",           "~> 0.3.20"
 gem "cancancan",        "1.10"
 
 ## models
-gem "aasm",             "~> 4.10.1"
+# TODO Can we go to released version 2.0
 gem "vestal_versions",  "1.2.4.3", github: "elzoiddy/vestal_versions"
 gem "awesome_nested_set", "3.0.3"
 gem "nokogiri",         "~> 1.6.1"
 
 ## views
 gem "bootstrap-sass",   "~> 2.3.2"
-gem "will_paginate",    "~> 3.0.5"
 gem "dynamic_form",     "~> 1.1.4"
 gem "ckeditor", "~> 4.1.6"
 gem "jquery-rails"
 gem "jquery-ui-rails"
 gem "vuejs-rails"
 gem "clockpunch",       "~> 0.1.0"
-gem "simple_form", "~> 3.2.1"
 gem "font-awesome-rails", "~> 3.2.0"
 gem "nested_form_fields"
 gem "text_helpers"

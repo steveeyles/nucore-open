@@ -7,7 +7,10 @@ require "rails_config"
 require "haml"
 require "rails-observers"
 require "paperclip"
+require "simple_form"
+require "will_paginate"
 require "will_paginate/array"
+require "aasm"
 
 module Nucore
 

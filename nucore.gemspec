@@ -27,5 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency "haml", "~> 4.0.5"
   s.add_dependency "rails-observers"
   s.add_dependency "paperclip",        "~> 4.2.0"
-
+  s.add_dependency "simple_form", "~> 3.2.1"
+  s.add_dependency "will_paginate", "~> 3.0.5"
+  s.add_dependency "aasm", "~> 4.10.1"
 end

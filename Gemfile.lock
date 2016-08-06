@@ -17,6 +17,7 @@ PATH
   remote: .
   specs:
     nucore (0.0.1)
+      aasm (~> 4.10.1)
       devise (~> 3.5.10)
       devise-encryptable (~> 0.2.0)
       devise_ldap_authenticatable (~> 0.8.5)
@@ -26,6 +27,8 @@ PATH
       rails (~> 4.2.7)
       rails-observers
       rails_config (= 0.3.3)
+      simple_form (~> 3.2.1)
+      will_paginate (~> 3.0.5)
 
 PATH
   remote: vendor/engines/c2po
@@ -517,7 +520,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aasm (~> 4.10.1)
   activerecord-oracle_enhanced-adapter (= 1.4.3)
   awesome_nested_set (= 3.0.3)
   awesome_print (= 1.1.0)
@@ -575,7 +577,6 @@ DEPENDENCIES
   sanger_sequencing (~> 0.0.1)!
   sass-rails (~> 5.0.6)
   shoulda-matchers (~> 2.8.0)
-  simple_form (~> 3.2.1)
   single_test (= 0.4.0)
   split_accounts (~> 0.0.1)!
   spreadsheet (~> 1.1.2)
@@ -593,7 +594,6 @@ DEPENDENCIES
   vuejs-rails
   web-console
   whenever
-  will_paginate (~> 3.0.5)
 
 BUNDLED WITH
    1.11.2
