@@ -8,7 +8,7 @@ RSpec.describe Reservation do
       reserve_start_date: 1.day.from_now.to_date,
       reserve_start_hour: 10,
       reserve_start_min: 0,
-      reserve_start_meridian: "am",
+      reserve_start_meridian: "AM",
       duration_mins: 60,
       split_times: true,
     )
@@ -279,37 +279,38 @@ RSpec.describe Reservation do
 
   context "create using virtual attributes" do
     it "should create using date, integer values" do
-      assert reservation.valid?
+      expect(reservation).to be_valid
       expect(reservation.reload.duration_mins).to eq(60)
-      expect(reservation.reserve_start_hour).to eq(10)
-      expect(reservation.reserve_start_min).to eq(0)
-      expect(reservation.reserve_start_meridian).to eq("am")
-      expect(reservation.reserve_end_hour).to eq(11)
-      expect(reservation.reserve_end_min).to eq(0)
+      expect(reservation.reserve_start_hour).to eq("10")
+      expect(reservation.reserve_start_min).to eq("00")
+      expect(reservation.reserve_start_meridian).to eq("AM")
+      expect(reservation.reserve_end_hour).to eq("11")
+      expect(reservation.reserve_end_min).to eq("00")
       expect(reservation.reserve_end_meridian).to eq("AM")
     end
 
     it "should create using string values" do
-      @reservation = instrument.reservations.create(reserve_start_date: (Date.today + 1.day).to_s,
+      @reservation = instrument.reservations.create(reserve_start_date: Date.today + 1.day,
                                                     reserve_start_hour: "10",
-                                                    reserve_start_min: "0",
+                                                    reserve_start_min: "00",
                                                     reserve_start_meridian: "am",
                                                     duration_mins: "120",
                                                     split_times: true)
-      assert @reservation.valid?
+      # binding.pry
+      expect(@reservation).to be_valid
       expect(@reservation.reload.duration_mins).to eq(120)
-      expect(@reservation.reserve_start_hour).to eq(10)
-      expect(@reservation.reserve_start_min).to eq(0)
-      expect(@reservation.reserve_start_meridian).to eq("am")
-      expect(@reservation.reserve_end_hour).to eq(12)
-      expect(@reservation.reserve_end_min).to eq(0)
+      expect(@reservation.reserve_start_hour).to eq("10")
+      expect(@reservation.reserve_start_min).to eq("00")
+      expect(@reservation.reserve_start_meridian).to eq("AM")
+      expect(@reservation.reserve_end_hour).to eq("12")
+      expect(@reservation.reserve_end_min).to eq("00")
       expect(@reservation.reserve_end_meridian).to eq("PM")
     end
   end
 
   describe "#canceled?" do
     subject(:reservation) do
-      instrument.reservations.create(reserve_start_date: (Date.today + 1.day).to_s,
+      instrument.reservations.create(reserve_start_date: Date.today + 1.day,
                                      reserve_start_hour: "10",
                                      reserve_start_min: "0",
                                      reserve_start_meridian: "am",
@@ -501,8 +502,9 @@ RSpec.describe Reservation do
 
     it "should not allow two reservations with the same order detail id" do
       reservation2 = @instrument.reservations.new(reserve_start_date: Date.today + 1.day, reserve_start_hour: 10,
-                                                  reserve_start_min: 0, reserve_start_meridian: "am",
+                                                  reserve_start_min: 0, reserve_start_meridian: "am", split_times: true,
                                                   duration_mins: 30, order_detail: @reservation1.order_detail)
+
       assert !reservation2.save
       expect(reservation2.errors[:order_detail]).not_to be_nil
     end
@@ -1078,9 +1080,10 @@ RSpec.describe Reservation do
 
     it "should not allow reservations starting before now" do
       @earlier = Date.today - 1
-      @reservation = @instrument.reservations.create(reserve_start_date: @earlier, reserve_start_hour: 10,
+      @reservation = @instrument.reservations.new(reserve_start_date: @earlier, reserve_start_hour: 10,
                                                      reserve_start_min: 0, reserve_start_meridian: "pm",
-                                                     duration_mins: 240)
+                                                     duration_mins: 240, split_times: true)
+
       assert @reservation.invalid?
     end
 
@@ -1116,11 +1119,12 @@ RSpec.describe Reservation do
       end
 
       it "should not let reservations occur after times defined by schedule rules" do
-        @reservation = @instrument.reservations.new(reserve_start_date: Date.today + 1, reserve_start_hour: 8, reserve_start_min: 0, reserve_start_meridian: "pm", duration_mins: 6)
+        @reservation = @instrument.reservations.new(reserve_start_date: Date.today + 1, reserve_start_hour: 8, reserve_start_min: 0, reserve_start_meridian: "pm", duration_mins: 6, split_times: true)
+
         expect(@reservation).to be_invalid
       end
       it "should not let reservations occur before times define by schedule rules" do
-        @reservation = @instrument.reservations.new(reserve_start_date: Date.today + 1, reserve_start_hour: 5, reserve_start_min: 0, reserve_start_meridian: "am", duration_mins: 60)
+        @reservation = @instrument.reservations.new(reserve_start_date: Date.today + 1, reserve_start_hour: 5, reserve_start_min: 0, reserve_start_meridian: "am", duration_mins: 60, split_times: true)
         expect(@reservation).to be_invalid
       end
 
