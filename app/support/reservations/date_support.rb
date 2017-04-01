@@ -13,16 +13,14 @@ module Reservations::DateSupport
     time_inputable :actual_start_at, prefix: :actual_start
     time_inputable :actual_end_at, prefix: :actual_end
 
-    # Use only in tests to make creation a little easier
-    attr_accessor :split_times
-    before_validation :set_all_split_times, if: :split_times
+    before_validation :set_all_end_times_from_durations
   end
 
   def assign_times_from_params(params)
     assign_reserve_from_params(params) if admin_editable?
     assign_actuals_from_params(params) if can_edit_actuals?
 
-    set_all_split_times
+    set_all_end_times_from_durations
   end
 
   def duration_mins
@@ -48,29 +46,28 @@ module Reservations::DateSupport
 
   private
 
-  def set_all_split_times
-    # set_reserve_start_at
+  def set_all_end_times_from_durations
     set_reserve_end_at
-    # set_actual_start_at
     set_actual_end_at
   end
 
   def assign_reserve_from_params(params)
-    # need to be reset to nil so the individual pieces will
-    # take precedence
     self.reserve_start_at = nil
-    self.reserve_end_at   = nil
+    self.reserve_end_at = nil
     reserve_attrs = params.slice(:reserve_start_date, :reserve_start_hour, :reserve_start_min, :reserve_start_meridian,
                                  :duration_mins,
                                  :reserve_start_at, :reserve_end_at)
+
     assign_attributes reserve_attrs
   end
 
   def assign_actuals_from_params(params)
-    self.actual_start_at = nil
-    self.actual_end_at   = nil
+    self.acual_start_at = nil
+    self.acual_end_at = nil
+
     reserve_attrs = params.slice(:actual_start_date, :actual_start_hour, :actual_start_min, :actual_start_meridian,
-                                 :actual_start_at, :actual_end_at, :actual_duration_mins)
+                                 :actual_duration_mins,
+                                 :actual_start_at, :actual_end_at)
 
     reserve_attrs.reject! { |_key, value| value.blank? }
 
@@ -79,16 +76,15 @@ module Reservations::DateSupport
 
   # set reserve_end_at based on duration_mins
   def set_reserve_end_at
-    return if reserve_end_at.present? || reserve_start_at.blank?
+    return if reserve_end_at.present? || reserve_start_at.blank? || @duration_mins.blank?
 
     self.reserve_end_at = reserve_start_at + @duration_mins.to_i.minutes
   end
 
   def set_actual_end_at
-    return if actual_end_at.present?
-    if @actual_duration_mins && actual_start_at
-      self.actual_end_at = actual_start_at + @actual_duration_mins.to_i.minutes
-    end
+    return if actual_end_at.present? || actual_start_at.blank? || @actual_duration_mins.blank?
+
+    self.actual_end_at = actual_start_at + @actual_duration_mins.to_i.minutes
   end
 
   def duration_with_seconds_stripped(start_time, end_time)

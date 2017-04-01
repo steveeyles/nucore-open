@@ -367,8 +367,7 @@ RSpec.describe Instrument do
       # 9 am - 10 am
       @start        = Time.zone.now.end_of_day + 1.second + 9.hours
       @reservation1 = @instrument.reservations.create(reserve_start_at: @start,
-                                                      duration_mins: 60,
-                                                      split_times: true)
+                                                      duration_mins: 60)
       assert @reservation1.valid?
       assert_equal 60, @reservation1.reload.duration_mins
     end
@@ -377,26 +376,22 @@ RSpec.describe Instrument do
       # 10 am - 11 am
       @start        = Time.zone.now.end_of_day + 1.second + 10.hours
       @reservation1 = @instrument.reservations.create(reserve_start_at: @start,
-                                                      reserve_end_at: @start + 1.hour,
-                                                      split_times: true)
+                                                      reserve_end_at: @start + 1.hour)
       assert @reservation1.valid?
       # not allow 10 am - 11 am
       @reservation2 = @instrument.reservations.create(reserve_start_at: @start,
-                                                      reserve_end_at: @start + 1.hour,
-                                                      split_times: true)
+                                                      reserve_end_at: @start + 1.hour)
       expect(@reservation2.errors[:base]).not_to be_empty
       # not allow 9:30 am - 10:30 am
       @reservation2 = @instrument.reservations.create(reserve_start_at: @start - 30.minutes,
-                                                      reserve_end_at: @start + 30.minutes,
-                                                      split_times: true)
+                                                      reserve_end_at: @start + 30.minutes)
       expect(@reservation2.errors[:base]).not_to be_empty
       # not allow 9:30 am - 10:30 am, using reserve_start_date, reserve_start_hour, reserve_start_min, reserve_start_meridian
-      @reservation2 = @instrument.reservations.create(reserve_start_date: @start.to_s,
+      @reservation2 = @instrument.reservations.create(reserve_start_date: @start,
                                                       reserve_start_hour: "9",
                                                       reserve_start_min: "30",
                                                       reserve_start_meridian: "am",
-                                                      duration_mins: "60",
-                                                      split_times: true)
+                                                      duration_mins: "60")
       expect(@reservation2.errors[:base]).not_to be_empty
       # not allow 9:30 am - 11:30 am
       @reservation2 = @instrument.reservations.create(reserve_start_at: @start - 30.minutes, reserve_end_at: @start + 90.minutes)
@@ -502,8 +497,7 @@ RSpec.describe Instrument do
       # add reservation for tomorrow morning at 9 am
       @start        = Time.zone.now.end_of_day + 1.second + 9.hours
       @reservation1 = @instrument.reservations.create(reserve_start_at: @start,
-                                                      duration_mins: 60,
-                                                      split_times: true)
+                                                      duration_mins: 60)
       assert @reservation1.valid?
       # find next reservation after 12 am tomorrow at 10 am tomorrow
       @next_reservation = @instrument.next_available_reservation(after: Time.zone.now.end_of_day + 1.second)

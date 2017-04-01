@@ -260,8 +260,7 @@ RSpec.describe OrderDetail do
         @order_detail.reservation = FactoryGirl.create(:reservation,
                                                        reserve_start_at: Time.current,
                                                        reserve_end_at: 1.hour.from_now,
-                                                       product: @instrument,
-                                                       split_times: true)
+                                                       product: @instrument)
         @order_detail.product = @instrument
         @order_detail.save
         assert @order_detail.reservation

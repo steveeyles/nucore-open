@@ -79,7 +79,6 @@ RSpec.describe ReservationsController do
             reserve_start_at: now,
             order_detail: order_detail,
             duration_mins: 60,
-            split_times: true,
           )
         end
 
@@ -92,8 +91,7 @@ RSpec.describe ReservationsController do
         let!(:reservation) do
           instrument.reservations.create(reserve_start_at: now - 1.day,
                                          order_detail: order_detail,
-                                         duration_mins: 60,
-                                         split_times: true)
+                                         duration_mins: 60)
         end
 
         before { do_request }
@@ -105,8 +103,7 @@ RSpec.describe ReservationsController do
         let!(:reservation) do
           instrument.reservations.create(reserve_start_at: now + 3.days,
                                          order_detail: order_detail,
-                                         duration_mins: 60,
-                                         split_times: true)
+                                         duration_mins: 60)
         end
 
         before(:each) do
@@ -430,7 +427,7 @@ RSpec.describe ReservationsController do
 
       context "creating a reservation in the past" do
         before :each do
-          @params.deep_merge!(reservation: { reserve_start_date: 1.day.ago })
+          @params.deep_merge!(reservation: { reserve_start_date: format_usa_date(1.day.ago) })
         end
 
         it_should_allow_all facility_operators, "to create a reservation in the past and have it be complete" do
@@ -458,7 +455,7 @@ RSpec.describe ReservationsController do
 
       context "creating a reservation in the future" do
         before :each do
-          @params.deep_merge!(reservation: { reserve_start_date: 1.day.from_now })
+          @params.deep_merge!(reservation: { reserve_start_date: format_usa_date(1.day.from_now) })
         end
 
         it_should_allow_all facility_operators, "to create a reservation in the future" do
@@ -471,7 +468,7 @@ RSpec.describe ReservationsController do
 
     context "creating a reservation in the future" do
       before :each do
-        @params.deep_merge!(reservation: { reserve_start_date: Time.zone.now.to_date + (PriceGroupProduct::DEFAULT_RESERVATION_WINDOW + 1).days })
+        @params.deep_merge!(reservation: { reserve_start_date: format_usa_date((PriceGroupProduct::DEFAULT_RESERVATION_WINDOW + 1).days.from_now) })
       end
 
       it_should_allow_all facility_operators, "to create a reservation beyond the default reservation window" do
@@ -504,19 +501,23 @@ RSpec.describe ReservationsController do
         sign_in @guest
         do_request
       end
+
       it "should have a flash message and render :new" do
         expect(flash[:error]).to be_present
         expect(response).to render_template :new
       end
+
       it "should maintain duration value" do
         expect(assigns[:reservation].duration_mins).to eq(60)
       end
+
       it "should not lose the time" do
-        expect(assigns[:reservation].reserve_start_date).to eq(format_usa_date(Time.zone.now.to_date + 1.day))
-        expect(assigns[:reservation].reserve_start_hour).to eq(9)
-        expect(assigns[:reservation].reserve_start_min).to eq(0)
-        expect(assigns[:reservation].reserve_start_meridian).to eq("am")
+        expect(assigns[:reservation].reserve_start_date).to eq(I18n.l(1.day.from_now.to_date, format: :usa_short))
+        expect(assigns[:reservation].reserve_start_hour).to eq("9")
+        expect(assigns[:reservation].reserve_start_min).to eq("00")
+        expect(assigns[:reservation].reserve_start_meridian).to eq("AM")
       end
+
       it "should assign the correct variables" do
         expect(assigns[:order]).to eq(@order)
         expect(assigns[:order_detail]).to eq(@order_detail)
@@ -685,7 +686,7 @@ RSpec.describe ReservationsController do
           let(:reserve_interval) { 1 }
 
           it "should not do any additional rounding" do
-            expect(assigns(:reservation).reserve_start_min).to eq(2)
+            expect(assigns(:reservation).reserve_start_min).to eq("02")
           end
         end
 
@@ -693,14 +694,14 @@ RSpec.describe ReservationsController do
           let(:reserve_interval) { 5 }
 
           it "should round up to the nearest 5 minutes" do
-            expect(assigns(:reservation).reserve_start_min).to eq(5)
+            expect(assigns(:reservation).reserve_start_min).to eq("05")
           end
         end
 
         describe "and the instrument has a 15 minute interval" do
           let(:reserve_interval) { 15 }
           it "should round up to the nearest 15 minutes" do
-            expect(assigns(:reservation).reserve_start_min).to eq(15)
+            expect(assigns(:reservation).reserve_start_min).to eq("15")
           end
         end
       end
@@ -713,7 +714,7 @@ RSpec.describe ReservationsController do
         end
 
         it "should round up to the nearest 5 minutes" do
-          expect(assigns(:reservation).reserve_start_min).to eq(5)
+          expect(assigns(:reservation).reserve_start_min).to eq("05")
         end
 
         it "should default the duration mins to minimum duration" do
@@ -809,7 +810,7 @@ RSpec.describe ReservationsController do
       # create reservation for tomorrow @ 9 am for 60 minutes, with order detail reference
       @start        = Time.zone.now.end_of_day + 1.second + 9.hours
       @reservation  = @instrument.reservations.create(reserve_start_at: @start, order_detail: @order_detail,
-                                                      duration_mins: 60, split_times: true)
+                                                      duration_mins: 60)
       assert @reservation.valid?
     end
 
@@ -888,9 +889,9 @@ RSpec.describe ReservationsController do
         @params.merge!(
           id: reservation.id,
           reservation: {
-            reserve_start_date: @start.to_date,
+            reserve_start_date: format_usa_date(@start),
             reserve_start_hour: "10",
-            reserve_start_min: "0",
+            reserve_start_min: "00",
             reserve_start_meridian: "am",
             duration_mins: "60",
           },
@@ -904,8 +905,8 @@ RSpec.describe ReservationsController do
         expect(assigns[:reservation]).to be_valid
         expect(assigns[:reservation]).not_to be_changed
 
-        expect(reservation.reload.reserve_start_hour).to eq(10)
-        expect(reservation.reserve_end_hour).to eq(11)
+        expect(reservation.reload.reserve_start_hour).to eq("10")
+        expect(reservation.reserve_end_hour).to eq("11")
         expect(reservation.duration_mins).to eq(60)
         expect(assigns[:order_detail].estimated_cost).to be_present
         expect(assigns[:order_detail].estimated_subsidy).to be_present
@@ -947,9 +948,9 @@ RSpec.describe ReservationsController do
               .and_return(false)
             do_request
             expect(reservation.reload.reserve_start_date)
-              .to eq(@start.strftime("%m/%d/%Y"))
-            expect(reservation.reload.reserve_start_hour).to eq(9)
-            expect(reservation.reload.reserve_start_min).to eq(0)
+              .to eq(@start.strftime("%-m/%-d/%Y"))
+            expect(reservation.reload.reserve_start_hour).to eq("9")
+            expect(reservation.reload.reserve_start_min).to eq("00")
             expect(reservation.reload.reserve_start_meridian).to eq("AM")
           end
 
@@ -967,7 +968,7 @@ RSpec.describe ReservationsController do
 
       context "when creating a reservation in the future" do
         let(:reserve_start_date) do
-          (PriceGroupProduct::DEFAULT_RESERVATION_WINDOW + 1).days.from_now
+          I18n.l((PriceGroupProduct::DEFAULT_RESERVATION_WINDOW + 1).days.from_now, format: :usa)
         end
 
         before(:each) do
@@ -1003,7 +1004,6 @@ RSpec.describe ReservationsController do
           reserve_start_at: Time.zone.now + 1.day,
           order_detail: @order_detail,
           duration_mins: 60,
-          split_times: true,
         )
 
         @params[:reservation_id] = @reservation.id
@@ -1029,7 +1029,6 @@ RSpec.describe ReservationsController do
           reserve_start_at: Time.zone.now + 1.day,
           order_detail: @order_detail,
           duration_mins: 24 * 60,
-          split_times: true,
         )
 
         @params[:reservation_id] = @reservation.id
@@ -1090,7 +1089,7 @@ RSpec.describe ReservationsController do
       # create reservation for tomorrow @ 9 am for 60 minutes, with order detail reference
       @start        = Time.zone.now + 1.second
       @reservation  = @instrument.reservations.create(reserve_start_at: @start, order_detail: @order_detail,
-                                                      duration_mins: 60, split_times: true)
+                                                      duration_mins: 60)
       assert @reservation.valid?
     end
 

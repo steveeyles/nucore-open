@@ -134,7 +134,6 @@ def place_reservation_for_instrument(ordered_by, instrument, account, reserve_st
     reserve_start_at: reserve_start,
     order_detail: order_detail,
     duration_mins: 60,
-    split_times: true,
   }
 
   res_attrs.merge!(extra_reservation_attrs) if extra_reservation_attrs
@@ -171,7 +170,6 @@ def place_reservation(facility, order_detail, reserve_start, extra_reservation_a
     reserve_start_at: reserve_start,
     order_detail: order_detail,
     duration_mins: 60,
-    split_times: true,
   }
   order_detail.update_attributes!(product: @instrument)
   order_detail.order.update_attributes!(state: "purchased")
