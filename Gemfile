@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-git_source(:github) { |repo_name| "git@github.com:#{repo_name}.git" }
+ruby File.open(File.expand_path(".ruby-version", File.dirname(__FILE__))) { |f| f.read.chomp }
 
 ## base
 gem "rails", "4.2.7.1"
