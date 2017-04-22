@@ -23,21 +23,10 @@ class AccountUser < ActiveRecord::Base
     admin_user_roles + read_only_user_roles
   end
 
-  def self.owners
-    where(user_role: ACCOUNT_OWNER)
-  end
-
-  def self.business_administrators
-    where(user_role: ACCOUNT_ADMINISTRATOR)
-  end
-
-  def self.purchasers
-    where(user_role: ACCOUNT_PURCHASER)
-  end
-
-  def self.active
-    where(deleted_at: nil)
-  end
+  scope :owners, -> { where(user_role: ACCOUNT_OWNER) }
+  scope :business_administrators, -> { where(user_role: ACCOUNT_ADMINISTRATOR) }
+  scope :purchasers, -> { where(user_role: ACCOUNT_PURCHASER) }
+  scope :active, -> { where(deleted_at: nil) }
 
   #
   # Provides an +Array+ of roles that can be assigned
