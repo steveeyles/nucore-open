@@ -129,28 +129,8 @@ class OrderDetail < ActiveRecord::Base
 
   scope :non_canceled, -> { where.not(state: "canceled") }
 
-  def self.for_facility(facility)
-    for_facility_id(facility.id)
-  end
-
-  def self.for_facility_id(facility_id = nil)
-    if facility_id.present?
-      joins(:order).where(orders: { facility_id: facility_id })
-    else
-      all
-    end
-  end
-
-  def self.for_facility_url(facility_url)
-    details = all.joins(:order)
-
-    unless facility_url.nil?
-      details = details.joins(order: :facility)
-      details = details.where(facilities: { url_name: facility_url })
-    end
-
-    details
-  end
+  scope :for_facility, -> (facility) { for_facility_id(facility.id) }
+  scope :for_facility_id, -> (facility_id) { joins(:order).where(orders: { facility_id: facility_id }) }
 
   def self.in_dispute
     where("dispute_at IS NOT NULL")
