@@ -14,7 +14,7 @@ class ScheduleRule < ActiveRecord::Base
 
   validate :at_least_one_day_selected, :end_time_is_after_start_time, :end_time_is_valid, :no_overlap_with_existing_rules, :no_conflict_with_existing_reservation
 
-  def self.available_to_user(user)
+  scope :available_to_user, -> (user) do
     where(product_users: { user_id: user.id })
       .joins(product: :product_users).
       # product doesn't have any restrictions at all, or has one that matches the product_user
@@ -24,7 +24,7 @@ class ScheduleRule < ActiveRecord::Base
          and product_access_schedule_rules.schedule_rule_id = schedule_rules.id)))")
   end
 
-  def self.unavailable_for_date(product, day)
+  scope :unavailable_for_date, -> (product, day) do
     rules = where(product_id: product.id)
     rules = unavailable(rules)
     rules = rules.select { |rule| rule.on_day?(day) }

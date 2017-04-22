@@ -15,7 +15,7 @@ class Schedule < ActiveRecord::Base
   # Scopes
   # -------
 
-  def self.active
+  scope :active, -> do
     where("schedules.id in
       (select schedule_id
        from products
@@ -25,9 +25,7 @@ class Schedule < ActiveRecord::Base
           archived: false)
   end
 
-  def self.ordered
-    order(:name)
-  end
+  scope :ordered, -> { order(:name) }
 
   # Instance methods
   # --------
