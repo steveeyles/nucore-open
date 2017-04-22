@@ -45,19 +45,14 @@ class User < ActiveRecord::Base
 
   # Scopes
 
-  def self.with_global_roles
-    where(id: UserRole.global.select("distinct user_id"))
-  end
-
-  def self.with_recent_orders(facility)
+  scope :with_global_roles, -> { where(id: UserRole.global.select("distinct user_id")) }
+  scope :with_recent_orders, -> (facility) do
     distinct
       .joins(:orders)
       .merge(Order.recent.for_facility(facility))
   end
 
-  def self.sort_last_first
-    order("LOWER(users.last_name), LOWER(users.first_name)")
-  end
+  scope :sort_last_first, -> { order("LOWER(users.last_name), LOWER(users.first_name)") }
 
   # finds all user role mappings for a this user in a facility
   def facility_user_roles(facility)
