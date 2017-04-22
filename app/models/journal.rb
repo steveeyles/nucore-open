@@ -67,7 +67,7 @@ class Journal < ActiveRecord::Base
   #
   # include_multi::
   #   include multi-facility journals in the results?
-  def self.for_facilities(facilities, include_multi = false)
+  scope :for_facilities, -> (facilities, include_multi = false) do
     allowed_ids = facilities.collect(&:id)
 
     if include_multi
