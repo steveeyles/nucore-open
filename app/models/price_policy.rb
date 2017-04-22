@@ -25,44 +25,22 @@ class PricePolicy < ActiveRecord::Base
   before_create :set_expire_date
   before_create :truncate_existing_policies
 
-  def self.for_date(start_date)
+  scope :for_date ->(start_date) do
     where("start_date >= ? AND start_date <= ?", start_date.beginning_of_day, start_date.end_of_day)
   end
 
-  def self.current
-    current_for_date(Time.zone.now)
-  end
+  scope :current, -> { current_for_date(Time.zone.now) }
 
-  def self.current_and_newest
-    # TODO: Fix bug that allows overlapping price policies (in truncate_existing_policies)
-    # This method returns the newest price policy for when price policies accidentally overlap.
-    current.newest
-  end
+  # This method returns the newest price policy for when price policies accidentally overlap.
+  # They are allowed ot overlap per the client.
+  scope :current_and_newest, { current.newest }
+  scope :newest { where(id: group(:price_group_id).maximum(:id).values) }
 
-  def self.newest
-    ids = group(:price_group_id).maximum(:id).values
-    where(id: ids)
-  end
-
-  def self.current_for_date(date)
-    where("start_date <= :now AND expire_date > :now", now: date)
-  end
-
-  def self.purchaseable
-    where(can_purchase: true)
-  end
-
-  def self.upcoming
-    where("start_date > :now", now: Time.zone.now)
-  end
-
-  def self.past
-    where("expire_date < :now", now: Time.zone.now)
-  end
-
-  def self.for_price_groups(price_groups)
-    where(price_group_id: price_groups)
-  end
+  scope :current_date, -> (date) { where("start_date <= :now AND expire_date > :now", now: date) }
+  scope :purchaseable, -> { where(can_purchase: true) }
+  scope :upcoming, -> { where("start_date > :now", now: Time.current) }
+  scope :past, -> { where("expire_date < :now", now: Time.zone.now) }
+  scope :for_price_groups, -> (price_groups) { where(price_group_id: price_groups) }
 
   def self.current_date(product)
     now = Time.current
