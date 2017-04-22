@@ -200,9 +200,7 @@ class OrderDetail < ActiveRecord::Base
     end
   end
 
-  def self.problem_orders
-    where(problem: true)
-  end
+  scope :problem_orders, -> { where(problem: true) }
 
   def self.joins_relay
     joins("INNER JOIN relays ON relays.instrument_id = products.id")
@@ -212,28 +210,8 @@ class OrderDetail < ActiveRecord::Base
     where("order_details.state <> ?", "reconciled")
   end
 
-  def self.with_actual_costs
-    where("actual_cost IS NOT NULL")
-  end
-
-  def self.with_estimated_costs
-    where("estimated_cost IS NOT NULL")
-  end
-
-  def in_review?
-    # check in the database if self.id is in the scope
-    self.class.all_in_review.find_by_id(id) ? true : false
-    # this would work without hitting the database again, but duplicates the functionality of the scope
-    # state == 'complete' and !reviewed_at.nil? and reviewed_at > Time.zone.now and (dispute_at.nil? or !dispute_resolved_at.nil?)
-  end
-
-  def reviewed?
-    reviewed_at.present? && !in_review? && !in_dispute?
-  end
-
-  def can_be_viewed_by?(user)
-    order.user_id == user.id || account.owner_user.id == user.id || account.business_admins.any? { |au| au.user_id == user.id }
-  end
+  scope :with_actual_costs, -> { where.not(actual_cost: nil) }
+  scope :with_estimated_costs, -> { where.not(estimated_cost: nil) }
 
   scope :need_statement, lambda { |facility|
     complete
@@ -460,6 +438,21 @@ class OrderDetail < ActiveRecord::Base
 
   def set_default_status!
     change_status! product.initial_order_status
+  end
+
+  def in_review?
+    # check in the database if self.id is in the scope
+    self.class.all_in_review.find_by_id(id) ? true : false
+    # this would work without hitting the database again, but duplicates the functionality of the scope
+    # state == 'complete' and !reviewed_at.nil? and reviewed_at > Time.zone.now and (dispute_at.nil? or !dispute_resolved_at.nil?)
+  end
+
+  def reviewed?
+    reviewed_at.present? && !in_review? && !in_dispute?
+  end
+
+  def can_be_viewed_by?(user)
+    order.user_id == user.id || account.owner_user.id == user.id || account.business_admins.any? { |au| au.user_id == user.id }
   end
 
   def save_as_user(user)
