@@ -48,6 +48,26 @@ class Account < ActiveRecord::Base
 
   delegate :administrators, to: :account_users
 
+  scope :for_facility, -> (facility) do
+    if facility.single_facility?
+      where(
+        "accounts.type in (:allow_all) or (accounts.type in (:limit_one) and accounts.facility_id = :facility)",
+        allow_all: config.global_account_types,
+        limit_one: config.facility_account_types,
+        facility: facility,
+      )
+    end
+  end
+
+  scope :for_user, -> (user) { joins(:account_users).where(account_users: { user_id: user.id }) }
+
+  scope :for_order_detail, -> (order_detail) do
+    for_user(order_detail.user)
+      .where(facility_id: [nil, order_detail.facility.id])
+  end
+
+  scope :with_orders_for_facility, -> (facility) { where(id: ids_with_orders(facility)) }
+
   # The @@config class variable stores account configuration details via a
   # seperate `AccountConfig` class. This way downstream repositories can use
   # customized account configurations. Also the `Account` model stays as thin
@@ -79,32 +99,6 @@ class Account < ActiveRecord::Base
   # Returns true if this account type supports journal.
   def self.using_journal?
     config.using_journal?(name)
-  end
-
-  def self.for_facility(facility)
-    if facility.single_facility?
-      where(
-        "accounts.type in (:allow_all) or (accounts.type in (:limit_one) and accounts.facility_id = :facility)",
-        allow_all: config.global_account_types,
-        limit_one: config.facility_account_types,
-        facility: facility,
-      )
-    else
-      all
-    end
-  end
-
-  def self.for_user(user)
-    joins(:account_users).where(account_users: { user_id: user.id })
-  end
-
-  def self.for_order_detail(order_detail)
-    for_user(order_detail.user)
-      .where(facility_id: [nil, order_detail.facility.id])
-  end
-
-  def self.with_orders_for_facility(facility)
-    where(id: ids_with_orders(facility))
   end
 
   # The subclassed Account objects will be cross facility by default; override
