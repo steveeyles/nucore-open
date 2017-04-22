@@ -12,6 +12,8 @@ class Statement < ActiveRecord::Base
 
   default_scope -> { order(created_at: :desc) }
 
+  scope :for_facility, -> (facility) { where(facility: facility) if facility.single_facility? }
+
   # Used in NU branch
   def first_order_detail_date
     min_order = order_details.min { |a, b| a.order.ordered_at <=> b.order.ordered_at }
@@ -34,14 +36,6 @@ class Statement < ActiveRecord::Base
   def self.find_by_invoice_number(query)
     return nil unless /\A(?<account_id>\d+)-(?<id>\d+)\z/ =~ query
     find_by(id: id, account_id: account_id)
-  end
-
-  def self.for_facility(facility)
-    if facility.single_facility?
-      where(facility: facility)
-    else
-      all
-    end
   end
 
   def invoice_date
