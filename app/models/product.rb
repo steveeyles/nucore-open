@@ -59,13 +59,9 @@ class Product < ActiveRecord::Base
     @product_types ||= [Instrument, Item, Service, Bundle]
   end
 
-  def self.non_instruments
-    where("products.type <> 'Instrument'")
-  end
+  scope :non_instruments, -> { where.not(type: "Instrument") }
 
-  def self.exclude(exclusion_list)
-    where("products.id NOT IN (?)", exclusion_list)
-  end
+  scope :exclude, -> (exclusion_list) { where.not(id: exclusion_list) }
 
   scope :for_facility, -> (facility) do
     if facility.blank?
