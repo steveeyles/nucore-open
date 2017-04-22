@@ -16,21 +16,10 @@ class Order < ActiveRecord::Base
 
   delegate :order_notification_recipient, to: :facility
 
-  def self.created_by_user(user)
-    where(created_by: user.id)
-  end
-
-  def self.carts
-    where(ordered_at: nil, merge_with_order_id: nil)
-  end
-
-  def self.for_facility(facility)
-    facility.cross_facility? ? all : where(facility_id: facility.id)
-  end
-
-  def self.recent
-    where("orders.ordered_at > ?", Time.zone.now - 1.year)
-  end
+  scope :created_by_user, -> (user) { where(created_by: user.id) }
+  scope :carts, -> { where(ordered_at: nil, merge_with_order_id: nil) }
+  scope :for_facility, -> (facility) { where(facility_id: facility.id) unless facility.cross_facility?}
+  scope :recent, -> { where("orders.ordered_at > ?", Time.zone.now - 1.year) }
 
   attr_accessor :being_purchased_by_admin
 
