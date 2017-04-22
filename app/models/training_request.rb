@@ -8,12 +8,12 @@ class TrainingRequest < ActiveRecord::Base
 
   validates_with ProductRequiresApprovalValidator
 
-  def self.submitted?(user, product)
-    where(product_id: product.id, user_id: user.id).present?
+  scope :from_product_user, -> (product_user) do
+    where(user_id: product_user.user_id, product_id: product_user.product_id)
   end
 
-  def self.from_product_user(product_user)
-    where(user_id: product_user.user_id, product_id: product_user.product_id)
+  def self.submitted?(user, product)
+    where(product_id: product.id, user_id: user.id).present?
   end
 
 end
