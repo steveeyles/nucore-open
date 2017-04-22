@@ -67,27 +67,17 @@ class Product < ActiveRecord::Base
     where("products.id NOT IN (?)", exclusion_list)
   end
 
-  scope :for_facility, lambda { |facility|
+  scope :for_facility, -> (facility) do
     if facility.blank?
       none
     elsif facility.single_facility?
       where(facility_id: facility.id)
-    else # cross-facility
-      all
     end
-  }
-
-  def self.requiring_approval
-    where(requires_approval: true)
   end
 
-  def self.requiring_approval_by_type
-    requiring_approval.group_by_type
-  end
-
-  def self.group_by_type
-    order(:type, :name).group_by(&:type)
-  end
+  scope :requiring_approval, -> { where(requires_approval: true) }
+  scope :requiring_approval_by_type, -> { requiring_approval.group_by_type }
+  scope :group_by_type, -> { order(:type, :name).group_by(&:type) }
 
   ## AR Hooks
   before_validation do
