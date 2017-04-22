@@ -18,7 +18,6 @@ class Order < ActiveRecord::Base
 
   scope :created_by_user, -> (user) { where(created_by: user.id) }
   scope :carts, -> { where(ordered_at: nil, merge_with_order_id: nil) }
-  scope :for_facility, -> (facility) { where(facility_id: facility.id) unless facility.cross_facility?}
   scope :recent, -> { where("orders.ordered_at > ?", Time.zone.now - 1.year) }
 
   attr_accessor :being_purchased_by_admin
