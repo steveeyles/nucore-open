@@ -841,7 +841,13 @@ class OrderDetail < ActiveRecord::Base
   # will have no effect. This is to protect `fulfilled_at` from being written
   # to when it shouldn't be. It should be a USA formatted date string.
   def manual_fulfilled_at=(string)
-    @manual_fulfilled_at = ValidFulfilledAtDate.parse(string)
+    @manual_fulfilled_at = ValidFulfilledAtDate.new(string)
+  end
+
+  validate do
+    if @manual_fulfilled_at && @manual_fulfilled_at.invalid?
+      errors.add(:fulfilled_at, @manual_fulfilled_at.error)
+    end
   end
 
   def time_data
